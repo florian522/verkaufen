@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spielzeug-Verkauf</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--paper:#F6F8EC;--surface:#FFFFFF;--ink:#1B2B2E;--muted:#5A6B66;--line:#DDE3CC;--green:#19555F;--green-ink:#FFFFFF;--green-soft:#DDEEEF;--lime:#C5D62E;--lime-ink:#19414A;--olive:#6E7D1B;--sticker:#F4D35E;--sticker-ink:#2A2410;--danger:#A23B2C;--loan:#FCE9D4;--loan-line:#F2C595;--loan-ink:#9A4A0C;
+--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--round:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",system-ui,sans-serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--bar-h:76px}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:16px;padding-bottom:calc(var(--bar-h) + 20px)}
+main{max-width:600px;margin:0 auto;padding:0 16px}
+.top{max-width:600px;margin:0 auto;padding:16px 16px 4px;display:flex;align-items:center;justify-content:space-between}
+.brand img{height:52px;display:block}
+.brand .fallback{font-family:var(--round);font-weight:700;color:var(--green);font-size:20px}
+.iconbtn{background:none;border:0;cursor:pointer;color:var(--ink);padding:8px;border-radius:10px;font-size:20px;line-height:1}
+.iconbtn:hover{background:var(--green-soft)}
+h1{font-family:var(--round);font-size:24px;font-weight:700;color:var(--olive);margin:6px 0 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h1 .count{font-family:var(--sans);font-size:13px;font-weight:400;color:var(--muted)}
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--green);text-decoration:none;font-size:15px;margin-top:8px;cursor:pointer;background:none;border:0;padding:0;font-family:inherit}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card.accent{border-color:var(--green);background:var(--surface)}
+label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+.card>label:first-child,.card>div:first-child>label:first-child{margin-top:0}
+label.req::after{content:" *";color:var(--danger)}
+input,select,textarea{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--green-soft);border-color:var(--green)}
+textarea{min-height:96px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:13px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--surface);color:var(--ink);text-decoration:none}
+.btn.lime{background:var(--lime);color:var(--lime-ink);border-color:var(--lime)}
+.btn.primary{background:var(--green);color:var(--green-ink);border-color:var(--green)}
+.btn.danger{color:var(--danger)}
+.btn.sm{padding:9px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.search{position:relative;margin-bottom:10px}
+.search input{padding-left:42px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.filter-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 13px;font:inherit;font-size:14px;cursor:pointer}
+.chip.on{background:var(--lime);border-color:var(--lime);color:var(--lime-ink);font-weight:600}
+.chip small{opacity:.75;margin-left:2px}
+.list{border-top:1px solid var(--line)}
+.rowi{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.rowi:hover{background:rgba(255,255,255,.6)}
+.thumb{width:44px;height:58px;object-fit:cover;border-radius:3px;background:var(--line);flex:none;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.row-title{font-family:var(--serif);font-size:16px;line-height:1.25}
+.row-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.tag{margin-left:auto;flex:none;font-size:14px;font-weight:700;letter-spacing:.56px;background:#D3D7DB;color:#2E353B;border-radius:4px;padding:7px 8px}
+.st{display:inline-block;font-size:11px;padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:1px;font-family:var(--sans)}
+.st-online{background:var(--green-soft);color:var(--green)}.st-reserviert{background:var(--sticker);color:var(--sticker-ink)}.st-verkauft{background:var(--lime);color:var(--lime-ink)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--line)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph .x{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(27,43,46,.7);color:#fff;cursor:pointer;font-size:15px;line-height:26px;padding:0}
+.ph .n{position:absolute;left:4px;bottom:4px;font-size:11px;background:rgba(27,43,46,.7);color:#fff;padding:1px 6px;border-radius:6px}
+.ph.first{outline:3px solid var(--lime);outline-offset:-3px}
+.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;aspect-ratio:1;border:1px dashed var(--muted);border-radius:10px;color:var(--muted);cursor:pointer;font-size:13px;text-align:center;background:var(--surface)}
+details summary{cursor:pointer;font-weight:600;color:var(--green)}
+.hint{font-size:13px;color:var(--muted);margin-top:6px}
+.err{color:var(--danger);font-size:14px;margin:8px 0;white-space:pre-wrap}
+.chk{display:flex;align-items:center;gap:8px;margin-top:4px;min-height:48px}.chk input{width:auto}
+.bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar-h);background:linear-gradient(to top,var(--paper) 70%,rgba(246,248,236,0));z-index:10}
+.bar-inner{max-width:640px;margin:0 auto;padding:14px 16px;display:flex;gap:8px}
+.bar-inner .btn{flex:1}
+.msg{position:fixed;left:50%;bottom:calc(var(--bar-h) + 8px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;z-index:20;max-width:90vw;font-size:14px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><img src="logo.png" alt="" onerror="this.outerHTML='<span class=\'fallback\'>Spielzeug-Verkauf</span>'"></div>
+  <button class="iconbtn" id="bSettings" title="Einstellungen" aria-label="Einstellungen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</div>
+<main id="app"></main>
+<div class="bar hidden" id="bar"><div class="bar-inner" id="barInner"></div></div>
+<div id="msg" class="msg hidden"></div>
+
+<script>
+/* ===== Einstellungen & Status ===== */
+const DEFAULTS = {
+  pbUrl: "https://inventar-db.kraus-kalbach.de",
+  authCollection: "users",
+  collection: "verkauf_artikel",
+  openaiKey: "",
+  model: "gpt-4.1-mini",
+  webSearch: true
+};
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+let cfg = Object.assign({}, DEFAULTS, LS.get("sv_cfg", {}));
+let auth = LS.get("sv_auth", null);   // {token, email}
+let items = [];
+let filter = { q:"", status:"" };
+
+const ZUSTAND = ["neu","wie neu","sehr gut","gut","gebraucht","defekt"];
+const VOLL = ["Ja","Nein","unbekannt"];
+const PREISART = ["Festpreis","VB","Zu verschenken"];
+const STATUS = ["offen","online","reserviert","verkauft"];
+
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nr3 = n => String(n ?? 0).padStart(3, "0");
+function toast(t, ms=2500){ const m=$("#msg"); m.textContent=t; m.classList.remove("hidden"); clearTimeout(toast._t); toast._t=setTimeout(()=>m.classList.add("hidden"), ms); }
+const opts = (arr, val, empty=true) => (empty?'<option value="">–</option>':'') + arr.map(v=>`<option ${v===val?"selected":""}>${esc(v)}</option>`).join("");
+
+/* ===== PocketBase (REST) ===== */
+async function pb(path, {method="GET", body=null, json=null}={}){
+  const headers = {};
+  if (auth?.token) headers["Authorization"] = auth.token;
+  if (json){ headers["Content-Type"]="application/json"; body = JSON.stringify(json); }
+  const r = await fetch(cfg.pbUrl.replace(/\/$/,"") + path, {method, headers, body});
+  if (r.status === 401 && auth){ logout(); throw new Error("Anmeldung abgelaufen – bitte neu anmelden."); }
+  const txt = await r.text();
+  let data = null; try{ data = txt ? JSON.parse(txt) : null; }catch(e){}
+  if (!r.ok){
+    let m = data?.message || r.statusText;
+    if (data?.data) m += "\n" + Object.entries(data.data).map(([k,v])=>`${k}: ${v.message}`).join("\n");
+    throw new Error(m);
+  }
+  return data;
+}
+const fileUrl = (rec, name) => `${cfg.pbUrl.replace(/\/$/,"")}/api/files/${rec.collectionId || cfg.collection}/${rec.id}/${encodeURIComponent(name)}`;
+
+async function login(email, pw){
+  const d = await pb(`/api/collections/${cfg.authCollection}/auth-with-password`, {method:"POST", json:{identity:email, password:pw}});
+  auth = {token:d.token, email}; LS.set("sv_auth", auth);
+}
+function logout(){ auth=null; LS.del("sv_auth"); render(); }
+
+async function loadItems(){
+  let page=1, all=[];
+  while(true){
+    const d = await pb(`/api/collections/${cfg.collection}/records?page=${page}&perPage=200&sort=nr`);
+    all = all.concat(d.items);
+    if (page >= d.totalPages) break; page++;
+  }
+  items = all;
+}
+
+/* ===== Bilder ===== */
+async function resizeImage(blob, max=1600, q=0.85){
+  let bmp;
+  try{ bmp = await createImageBitmap(blob, {imageOrientation:"from-image"}); }
+  catch(e){ bmp = await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(blob); }); }
+  const w = bmp.width, h = bmp.height, s = Math.min(1, max/Math.max(w,h));
+  const c = document.createElement("canvas"); c.width=Math.round(w*s); c.height=Math.round(h*s);
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  return await new Promise(res => c.toBlob(res, "image/jpeg", q));
+}
+const blobToDataUrl = b => new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(b); });
+
+/* ===== Ansichten ===== */
+function setBar(html){
+  const b=$("#bar"); if(!html){ b.classList.add("hidden"); return; }
+  $("#barInner").innerHTML = html; b.classList.remove("hidden");
+}
+function render(){
+  if (!auth) return renderLogin();
+  renderList();
+}
+
+function renderLogin(){
+  setBar("");
+  app.innerHTML = `
+  <h1>Spielzeug-Verkauf</h1>
+  <div class="card">
+    <label>E-Mail</label><input id="lE" type="email" autocomplete="username" value="${esc(LS.get("sv_lastEmail",""))}">
+    <label>Passwort</label><input id="lP" type="password" autocomplete="current-password">
+    <p class="hint">Login für ${esc(cfg.pbUrl.replace(/^https?:\/\//,""))} – derselbe wie beim Inventar.</p>
+    <div class="btns"><button class="btn primary" id="lGo" style="flex:1">Anmelden</button></div>
+    <div class="err" id="lErr"></div>
+  </div>`;
+  const go = async () => {
+    $("#lErr").textContent=""; $("#lGo").disabled=true;
+    try{ LS.set("sv_lastEmail", $("#lE").value); await login($("#lE").value.trim(), $("#lP").value); render(); }
+    catch(e){ $("#lErr").textContent = "Anmeldung fehlgeschlagen: " + e.message; $("#lGo").disabled=false; }
+  };
+  $("#lGo").onclick = go; $("#lP").onkeydown = e => { if(e.key==="Enter") go(); };
+}
+
+async function renderList(){
+  setBar("");
+  app.innerHTML = `<h1>Verkauf</h1><p class="hint">Lade Artikel …</p>`;
+  try{ await loadItems(); }
+  catch(e){
+    app.innerHTML = `<h1>Verkauf</h1><div class="card"><b>Artikel konnten nicht geladen werden.</b><div class="err">${esc(e.message)}</div>
+    <p class="hint">Gibt es die Collection „${esc(cfg.collection)}“ in PocketBase schon? (Siehe Anleitung.)</p>
+    <div class="btns"><button class="btn" onclick="renderList()">Erneut versuchen</button><button class="btn" onclick="logout()">Abmelden</button></div></div>`;
+    return;
+  }
+  drawList();
+}
+
+function drawList(){
+  window.scrollTo(0,0);
+  const cnt = s => items.filter(i => (i.status||"offen")===s).length;
+  const chips = [["","Alle",items.length], ...STATUS.map(s=>[s, s[0].toUpperCase()+s.slice(1), cnt(s)])];
+  app.innerHTML = `
+  <h1>Verkauf <span class="count">${items.length} Artikel</span></h1>
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="fQ" placeholder="Suchen …" value="${esc(filter.q)}">
+  </div>
+  <div class="filter-row"><div class="filters">${chips.map(([v,l,n])=>`<button class="chip ${filter.status===v?"on":""}" data-s="${v}">${l} <small>${n}</small></button>`).join("")}</div></div>
+  <div class="list" id="list"></div>`;
+  $("#fQ").oninput = e => { filter.q = e.target.value; drawItems(); };
+  document.querySelectorAll(".chip").forEach(c => c.onclick = () => { filter.status = c.dataset.s; drawList(); });
+  setBar(`<button class="btn" id="bExport">⤓ ZIP-Export</button><button class="btn lime" id="bNew">＋ Hinzufügen</button>`);
+  $("#bNew").onclick = () => renderEdit(null);
+  $("#bExport").onclick = exportZip;
+  drawItems();
+}
+
+function drawItems(){
+  const q = filter.q.toLowerCase();
+  const list = items.filter(i =>
+    (!filter.status || (i.status||"offen")===filter.status) &&
+    (!q || [i.artikel,i.marke,i.set_nr,i.titel,nr3(i.nr)].join(" ").toLowerCase().includes(q)));
+  $("#list").innerHTML = list.length ? list.map(i => {
+    const f = (i.fotos||[])[0];
+    const st = i.status || "offen";
+    const preis = i.titel && i.preisart ? (i.preisart==="Zu verschenken" ? "zu verschenken" : `${esc(i.preis)} €${i.preisart==="VB"?" VB":""}`) : "noch kein Anzeigentext";
+    const sub = [esc(i.marke), esc(i.set_nr), `${(i.fotos||[]).length} Foto(s)`, preis].filter(Boolean).join(" · ");
+    return `<div class="rowi" data-id="${i.id}">
+      ${f ? `<img class="thumb" loading="lazy" src="${fileUrl(i,f)}" alt="">` : `<div class="thumb"></div>`}
+      <div style="min-width:0">
+        <div class="row-title">${esc(i.artikel)}${st!=="offen"?`<span class="st st-${st}">${st}</span>`:""}</div>
+        <div class="row-sub">${sub}</div>
+      </div>
+      <span class="tag">${nr3(i.nr)}</span></div>`;
+  }).join("") : `<p class="hint" style="padding:16px 4px">Noch keine Artikel. Tippe unten auf „Hinzufügen“.</p>`;
+  document.querySelectorAll(".rowi").forEach(el => el.onclick = () => renderEdit(items.find(i=>i.id===el.dataset.id)));
+}
+
+/* ===== Bearbeiten ===== */
+let ed = null; // {rec, keep:[names], remove:[names], neu:[{blob,url}]}
+
+function nextNr(){ return items.reduce((m,i)=>Math.max(m, Number(i.nr)||0), 0) + 1; }
+
+function renderEdit(rec){
+  window.scrollTo(0,0);
+  ed = { rec, keep: rec ? [...(rec.fotos||[])] : [], remove: [], neu: [] };
+  const r = rec || { nr: nextNr(), status: "offen" };
+  const hasExtra = r.marke||r.set_nr||r.menge||r.zustand||r.vollstaendig||r.ovp||r.bemerkung;
+  app.innerHTML = `
+  <button class="back" id="eBackLink">‹ Verkauf</button>
+  <h1>${rec ? "Artikel" : "Neu: Artikel"} <span class="tag" style="margin-left:0">${nr3(r.nr)}</span></h1>
+
+  <label class="req" style="margin-top:0">Artikel</label>
+  <input id="eArtikel" value="${esc(r.artikel)}" placeholder="z. B. Playmobil Bauernhof mit Tieren">
+
+  <label class="req">Fotos <span style="font-weight:400">– das erste ist das Titelbild</span></label>
+  <div class="photos" id="ePhotos"></div>
+  <input type="file" id="eFile" accept="image/*" multiple class="hidden">
+
+  <div class="card" style="margin-top:16px">
+    <details ${hasExtra?"open":""}>
+      <summary>Weitere Angaben (optional)</summary>
+      <div class="row">
+        <div><label>Marke / Hersteller</label><input id="eMarke" value="${esc(r.marke)}"></div>
+        <div><label>Set- / Artikelnr.</label><input id="eSet" value="${esc(r.set_nr)}"></div>
+        <div><label>Menge / Umfang</label><input id="eMenge" value="${esc(r.menge)}" placeholder="z. B. 1 Set, ca. 2 kg"></div>
+        <div><label>Zustand</label><select id="eZustand">${opts(ZUSTAND, r.zustand)}</select></div>
+        <div><label>Vollständig?</label><select id="eVoll">${opts(VOLL, r.vollstaendig)}</select></div>
+        <div><label>Originalkarton</label><div class="chk"><input type="checkbox" id="eOvp" ${r.ovp?"checked":""}><span>vorhanden</span></div></div>
+      </div>
+      <label>Bemerkung (Mängel, Besonderheiten)</label><textarea id="eBem">${esc(r.bemerkung)}</textarea>
+    </details>
+  </div>
+
+  <div class="card accent">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <b style="color:var(--green)">Anzeige</b>
+      <button class="btn primary sm" id="eAI">✨ Text &amp; Preis mit ChatGPT</button>
+    </div>
+    <div class="hint">${cfg.openaiKey ? "" : "Für ChatGPT zuerst den API-Schlüssel in den Einstellungen (⚙︎) eintragen. Optional – sonst schreibe ich die Texte beim Einstellen."}</div>
+    <label>Anzeigentitel</label><input id="eTitel" maxlength="65" value="${esc(r.titel)}">
+    <label>Beschreibung</label><textarea id="eBeschr" style="min-height:170px">${esc(r.beschreibung)}</textarea>
+    <div class="row">
+      <div><label>Preis (€)</label><input id="ePreis" type="number" inputmode="numeric" min="0" step="1" value="${esc(r.preis ?? "")}"></div>
+      <div><label>Preisart</label><select id="ePreisart">${opts(PREISART, r.preisart)}</select></div>
+      <div><label>Kategorie-Vorschlag</label><input id="eKat" value="${esc(r.kategorie)}"></div>
+      <div><label>Status</label><select id="eStatus">${opts(STATUS, r.status||"offen", false)}</select></div>
+    </div>
+    <label>Preis-Recherche / Notiz</label><textarea id="ePNotiz">${esc(r.preis_notiz)}</textarea>
+  </div>
+
+  ${rec ? `<div class="btns" style="margin-bottom:8px"><button class="btn danger" id="eDel">Artikel löschen</button></div>` : ""}
+  <div class="err" id="eErr"></div>`;
+  setBar(`<button class="btn" id="eBack">Abbrechen</button><button class="btn lime" id="eSave">Speichern</button>`);
+  drawPhotos();
+  $("#eFile").onchange = async e => {
+    const files = [...e.target.files]; e.target.value = "";
+    toast("Fotos werden vorbereitet …");
+    for (const f of files){
+      if (photoCount() >= 20) { toast("Maximal 20 Fotos pro Artikel."); break; }
+      try{ const b = await resizeImage(f); ed.neu.push({blob:b, url:URL.createObjectURL(b)}); }
+      catch(err){ toast("Ein Foto konnte nicht gelesen werden."); }
+    }
+    drawPhotos();
+  };
+  $("#eBack").onclick = () => drawList();
+  $("#eBackLink").onclick = () => drawList();
+  $("#eSave").onclick = () => save(r.nr);
+  if (rec) $("#eDel").onclick = () => del(rec);
+  $("#eAI").onclick = runAI;
+}
+
+function photoCount(){ return ed.keep.length + ed.neu.length; }
+
+function drawPhotos(){
+  let n = 0, html = "";
+  const cell = (src, attr) => { n++; return `<div class="ph ${n===1?"first":""}"><img src="${src}"><span class="n">${n===1?"Titelbild":String(n).padStart(2,"0")}</span><button class="x" ${attr} aria-label="Foto entfernen">×</button></div>`; };
+  ed.keep.forEach((name, i) => html += cell(fileUrl(ed.rec,name), `data-k="${i}"`));
+  ed.neu.forEach((p, i) => html += cell(p.url, `data-n="${i}"`));
+  if (n < 20) html += `<div class="add" id="eAdd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto(s)</div>`;
+  $("#ePhotos").innerHTML = html;
+  const add = $("#eAdd"); if (add) add.onclick = () => $("#eFile").click();
+  document.querySelectorAll(".ph .x").forEach(b => b.onclick = () => {
+    if (b.dataset.k !== undefined){ ed.remove.push(ed.keep[+b.dataset.k]); ed.keep.splice(+b.dataset.k,1); }
+    else { ed.neu.splice(+b.dataset.n,1); }
+    drawPhotos();
+  });
+}
+
+function formValues(){
+  const v = id => $(id).value.trim();
+  return {
+    artikel: v("#eArtikel"), marke: v("#eMarke"), set_nr: v("#eSet"), menge: v("#eMenge"),
+    zustand: v("#eZustand"), vollstaendig: v("#eVoll"), ovp: $("#eOvp").checked, bemerkung: v("#eBem"),
+    titel: v("#eTitel"), beschreibung: $("#eBeschr").value.trim(), preis: v("#ePreis"),
+    preisart: v("#ePreisart"), kategorie: v("#eKat"), preis_notiz: $("#ePNotiz").value.trim(), status: v("#eStatus")
+  };
+}
+
+async function save(nr){
+  const f = formValues();
+  $("#eErr").textContent = "";
+  if (!f.artikel){ $("#eErr").textContent = "Bitte den Artikel eintragen."; return $("#eArtikel").focus(); }
+  if (photoCount() < 1){ $("#eErr").textContent = "Bitte mindestens ein Foto hinzufügen."; return; }
+  const fd = new FormData();
+  for (const [k,val] of Object.entries(f)){
+    if (k==="preis") fd.append(k, val==="" ? "" : String(Number(val)));
+    else if (k==="ovp") fd.append(k, val ? "true" : "false");
+    else fd.append(k, val);
+  }
+  const fileKey = ed.rec ? "fotos+" : "fotos";
+  ed.neu.forEach((p, i) => fd.append(fileKey, p.blob, `${nr3(nr)}-${String(ed.keep.length+i+1).padStart(2,"0")}.jpg`));
+  ed.remove.forEach(name => fd.append("fotos-", name));
+  const btn = $("#eSave"); btn.disabled = true; btn.textContent = "Speichere …";
+  try{
+    if (ed.rec) await pb(`/api/collections/${cfg.collection}/records/${ed.rec.id}`, {method:"PATCH", body:fd});
+    else { fd.append("nr", String(nr)); await pb(`/api/collections/${cfg.collection}/records`, {method:"POST", body:fd}); }
+    toast("Gespeichert ✓");
+    renderList();
+  }catch(e){
+    $("#eErr").textContent = "Speichern fehlgeschlagen: " + e.message;
+    btn.disabled = false; btn.textContent = "Speichern";
+  }
+}
+
+async function del(rec){
+  if (!confirm(`Artikel ${nr3(rec.nr)} „${rec.artikel}“ mit allen Fotos wirklich löschen?`)) return;
+  try{ await pb(`/api/collections/${cfg.collection}/records/${rec.id}`, {method:"DELETE"}); toast("Gelöscht"); renderList(); }
+  catch(e){ $("#eErr").textContent = "Löschen fehlgeschlagen: " + e.message; }
+}
+
+/* ===== ChatGPT ===== */
+async function runAI(){
+  const f = formValues();
+  $("#eErr").textContent = "";
+  if (!cfg.openaiKey){ toast("Bitte zuerst den ChatGPT-API-Schlüssel in den Einstellungen eintragen.", 4000); return; }
+  if (!f.artikel && photoCount() < 1){ $("#eErr").textContent = "Bitte zuerst Artikel oder Foto eintragen."; return; }
+  const btn = $("#eAI"); btn.disabled = true; btn.textContent = "ChatGPT arbeitet … (bis ca. 1 Min.)";
+  try{
+    const imgs = [];
+    for (const name of ed.keep.slice(0,4)){
+      const b = await (await fetch(fileUrl(ed.rec,name))).blob();
+      imgs.push(await blobToDataUrl(await resizeImage(b, 768, 0.8)));
+    }
+    for (const p of ed.neu.slice(0, Math.max(0, 4-imgs.length))) imgs.push(await blobToDataUrl(await resizeImage(p.blob, 768, 0.8)));
+
+    const angaben = [
+      ["Artikel", f.artikel], ["Marke/Hersteller", f.marke], ["Set-/Artikelnr.", f.set_nr], ["Menge/Umfang", f.menge],
+      ["Zustand", f.zustand], ["Vollständig", f.vollstaendig], ["Originalkarton", f.ovp ? "ja" : ""], ["Bemerkung", f.bemerkung]
+    ].filter(x=>x[1]).map(x=>`- ${x[0]}: ${x[1]}`).join("\n");
+
+    const prompt = `Du hilfst bei einem privaten Verkauf gebrauchter Spielsachen auf kleinanzeigen.de (Deutschland).
+Angaben des Verkäufers:
+${angaben || "- (keine, bitte anhand der Fotos bestimmen)"}
+
+Aufgaben:
+1. Bestimme anhand der Angaben und Fotos möglichst genau, was es ist (Hersteller, Serie, Set-Nummer, Erscheinungsjahr, falls erkennbar).
+2. ${cfg.webSearch ? "Recherchiere im Web aktuelle Gebrauchtpreise (z. B. Angebote auf kleinanzeigen.de, verkaufte Artikel bei eBay)." : "Schätze einen realistischen Gebrauchtpreis."} Schlage einen realistischen Preis vor, zu dem der Artikel in einigen Wochen verkauft wird.
+3. Schreibe Titel und Beschreibung für die Anzeige.
+
+Regeln:
+- Titel max. 65 Zeichen, mit Marke und Set-Nr., wenn bekannt.
+- Beschreibung freundlich, sachlich, ehrlich, ohne Emojis. Inhalt/Umfang, Zustand und Vollständigkeit nennen, erkennbare Mängel nicht verschweigen. Nichts erfinden, was nicht aus Angaben oder Fotos hervorgeht; Unsicheres als „vermutlich“ kennzeichnen.
+- Am Ende der Beschreibung: „Privatverkauf, keine Garantie oder Rücknahme.“
+- Antworte NUR mit JSON in genau diesem Format:
+{"titel":"…","beschreibung":"…","preis":0,"preisart":"VB","kategorie":"…","preis_notiz":"kurze Begründung mit 2–4 Vergleichspreisen und Quellen"}
+preisart ist "Festpreis" oder "VB". kategorie ist die passende Kleinanzeigen-Kategorie (z. B. "Familie, Kind & Baby > Spielzeug").`;
+
+    const content = [{type:"input_text", text:prompt}, ...imgs.map(u => ({type:"input_image", image_url:u}))];
+    const call = async (withTools) => {
+      const body = { model: cfg.model, input: [{role:"user", content}] };
+      if (withTools) body.tools = [{type:"web_search_preview"}];
+      const r = await fetch("https://api.openai.com/v1/responses", {
+        method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.openaiKey }, body: JSON.stringify(body)
+      });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok) { const e = new Error(d?.error?.message || r.statusText); e.status=r.status; throw e; }
+      return d;
+    };
+    let d;
+    try{ d = await call(cfg.webSearch); }
+    catch(e){ if (cfg.webSearch && e.status===400){ d = await call(false); } else throw e; }
+
+    const text = d.output_text || (d.output||[]).filter(o=>o.type==="message").flatMap(o=>o.content||[]).filter(c=>c.type==="output_text").map(c=>c.text).join("\n");
+    const m = text.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error("Antwort war kein JSON:\n" + text.slice(0,400));
+    const j = JSON.parse(m[0]);
+    if (j.titel) $("#eTitel").value = String(j.titel).slice(0,65);
+    if (j.beschreibung) $("#eBeschr").value = j.beschreibung;
+    if (j.preis !== undefined && j.preis !== null && j.preis !== "") $("#ePreis").value = Math.round(Number(j.preis));
+    if (PREISART.includes(j.preisart)) $("#ePreisart").value = j.preisart;
+    if (j.kategorie) $("#eKat").value = j.kategorie;
+    if (j.preis_notiz) $("#ePNotiz").value = j.preis_notiz;
+    toast("Vorschlag eingetragen – bitte prüfen und speichern.", 4000);
+  }catch(e){
+    $("#eErr").textContent = "ChatGPT-Fehler: " + e.message;
+  }finally{
+    btn.disabled = false; btn.textContent = "✨ Text & Preis mit ChatGPT";
+  }
+}
+
+/* ===== Export ===== */
+async function exportZip(){
+  if (!window.JSZip){ return toast("ZIP-Bibliothek nicht geladen – Internetverbindung prüfen."); }
+  const onlyOpen = confirm("Nur Artikel mit Status „offen“ exportieren?\n\nOK = nur offene · Abbrechen = alle");
+  toast("Export wird erstellt …", 60000);
+  try{
+    await loadItems();
+    const list = items.filter(i => !onlyOpen || (i.status||"offen")==="offen");
+    const zip = new JSZip(), dir = zip.folder("bilder");
+    const out = [];
+    for (const i of list){
+      const bilder = [];
+      for (let k=0; k<(i.fotos||[]).length; k++){
+        const fn = `${nr3(i.nr)}-${String(k+1).padStart(2,"0")}.jpg`;
+        const b = await (await fetch(fileUrl(i, i.fotos[k]))).blob();
+        dir.file(fn, b); bilder.push(fn);
+      }
+      out.push({ nr:nr3(i.nr), artikel:i.artikel, marke:i.marke, set_nr:i.set_nr, menge:i.menge, zustand:i.zustand,
+        vollstaendig:i.vollstaendig, originalkarton:!!i.ovp, bemerkung:i.bemerkung, titel:i.titel, beschreibung:i.beschreibung,
+        preis:i.preis, preisart:i.preisart, kategorie:i.kategorie, preis_notiz:i.preis_notiz, status:i.status||"offen", bilder, id:i.id });
+    }
+    zip.file("artikel.json", JSON.stringify(out, null, 2));
+    const cols = ["nr","artikel","marke","set_nr","menge","zustand","vollstaendig","originalkarton","bemerkung","titel","beschreibung","preis","preisart","kategorie","status","bilder"];
+    const cell = v => `"${String(Array.isArray(v)?v.join(", "):(v??"")).replace(/"/g,'""')}"`;
+    zip.file("artikel.csv", "﻿" + [cols.join(";"), ...out.map(o=>cols.map(c=>cell(o[c])).join(";"))].join("\r\n"));
+    const blob = await zip.generateAsync({type:"blob"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `spielzeug-export-${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast(`Export fertig: ${out.length} Artikel`);
+  }catch(e){ toast("Export fehlgeschlagen: " + e.message, 6000); }
+}
+
+/* ===== Einstellungen ===== */
+function renderSettings(){
+  window.scrollTo(0,0);
+  app.innerHTML = `
+  <button class="back" id="sBackLink">‹ Zurück</button>
+  <h1>Einstellungen</h1>
+  <div class="card">
+    <b style="color:var(--green)">ChatGPT (optional)</b>
+    <label>OpenAI API-Schlüssel</label>
+    <input id="sKey" type="password" placeholder="sk-proj-…" value="${esc(cfg.openaiKey)}" autocomplete="off">
+    <p class="hint">Wird nur in diesem Browser auf diesem Gerät gespeichert – nicht in der Datei und nicht in PocketBase. Auf jedem Gerät einmal eintragen.</p>
+    <div class="row">
+      <div><label>Modell</label><input id="sModel" value="${esc(cfg.model)}"></div>
+      <div><label>Web-Recherche</label><div class="chk"><input type="checkbox" id="sWeb" ${cfg.webSearch?"checked":""}><span>für Preise nutzen</span></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <b style="color:var(--green)">Datenbank</b>
+    <label>PocketBase-Adresse</label><input id="sUrl" value="${esc(cfg.pbUrl)}">
+    <div class="row">
+      <div><label>Login-Collection</label><input id="sAuth" value="${esc(cfg.authCollection)}"></div>
+      <div><label>Artikel-Collection</label><input id="sCol" value="${esc(cfg.collection)}"></div>
+    </div>
+    ${auth ? `<p class="hint">Angemeldet als ${esc(auth.email)}</p><div class="btns"><button class="btn sm" id="sOut">Abmelden</button></div>` : ""}
+  </div>`;
+  setBar(`<button class="btn" id="sBack">Abbrechen</button><button class="btn lime" id="sSave">Speichern</button>`);
+  $("#sSave").onclick = () => {
+    cfg = { pbUrl:$("#sUrl").value.trim()||DEFAULTS.pbUrl, authCollection:$("#sAuth").value.trim()||"users",
+      collection:$("#sCol").value.trim()||DEFAULTS.collection, openaiKey:$("#sKey").value.trim(),
+      model:$("#sModel").value.trim()||DEFAULTS.model, webSearch:$("#sWeb").checked };
+    LS.set("sv_cfg", cfg); toast("Gespeichert ✓"); render();
+  };
+  $("#sBack").onclick = () => render();
+  $("#sBackLink").onclick = () => render();
+  if (auth) $("#sOut").onclick = logout;
+}
+
+$("#bSettings").onclick = renderSettings;
+render();
+</script>
+</body>
+</html>
