@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#F6F8EC"/>
+<g id="art" transform="translate(0,-26)">
+  <!-- Schatten -->
+  <ellipse cx="256" cy="402" rx="150" ry="13" fill="#DDE3CC"/>
+  <!-- Geldscheine (Stapel) -->
+  <g>
+    <rect x="118" y="348" width="210" height="50" rx="7" fill="#19555F"/>
+    <rect x="132" y="360" width="182" height="26" rx="4" fill="none" stroke="#C5D62E" stroke-width="4"/>
+    <text x="223" y="381" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="22" fill="#C5D62E">€</text>
+    <rect x="128" y="302" width="210" height="50" rx="7" fill="#C5D62E"/>
+    <rect x="142" y="314" width="182" height="26" rx="4" fill="none" stroke="#19414A" stroke-width="4" opacity=".55"/>
+    <text x="233" y="335" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="22" fill="#19414A" opacity=".6">€</text>
+  </g>
+  <!-- Münzstapel -->
+  <g>
+    <ellipse cx="368" cy="388" rx="46" ry="12" fill="#C9A227"/>
+    <rect x="322" y="368" width="92" height="20" fill="#C9A227"/>
+    <ellipse cx="368" cy="368" rx="46" ry="12" fill="#F4D35E"/>
+    <rect x="322" y="348" width="92" height="20" fill="#C9A227"/>
+    <ellipse cx="368" cy="348" rx="46" ry="12" fill="#F4D35E"/>
+    <rect x="322" y="328" width="92" height="20" fill="#C9A227"/>
+    <ellipse cx="368" cy="328" rx="46" ry="12" fill="#F4D35E"/>
+  </g>
+  <!-- große Euro-Münze -->
+  <g>
+    <circle cx="378" cy="262" r="50" fill="#C9A227"/>
+    <circle cx="374" cy="258" r="50" fill="#F4D35E"/>
+    <circle cx="374" cy="258" r="38" fill="none" stroke="#C9A227" stroke-width="5"/>
+    <text x="374" y="276" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="54" fill="#8A6D0B">€</text>
+  </g>
+  <!-- Eichhörnchen -->
+  <g fill="#86C5CB">
+    <!-- Schwanz -->
+    <path d="M196 262 C150 270 112 240 118 196 C124 150 176 134 204 160 C224 180 214 210 190 210 C172 210 168 190 180 184 C160 180 150 204 160 222 C172 244 204 244 222 236 Z"/>
+    <!-- Körper -->
+    <ellipse cx="240" cy="258" rx="52" ry="36"/>
+    <!-- Kopf -->
+    <circle cx="292" cy="222" r="30"/>
+    <!-- Schnauze -->
+    <ellipse cx="318" cy="230" rx="16" ry="12"/>
+    <!-- Ohr -->
+    <path d="M280 200 L288 166 L304 198 Z"/>
+    <!-- Hinterbein -->
+    <ellipse cx="206" cy="284" rx="26" ry="16"/>
+    <path d="M190 292 Q196 304 226 302 L230 294 Z"/>
+    <!-- Vorderpfoten halten die Münze -->
+    <path d="M276 250 Q306 258 326 250" stroke="#86C5CB" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <path d="M262 268 Q296 284 330 274" stroke="#86C5CB" stroke-width="14" stroke-linecap="round" fill="none"/>
+  </g>
+  <circle cx="300" cy="216" r="5" fill="#19414A"/>
+  <circle cx="332" cy="228" r="4" fill="#19414A"/>
+</g>
+</svg>
